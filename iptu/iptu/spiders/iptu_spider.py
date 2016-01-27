@@ -12,8 +12,20 @@ class IptuSpider(scrapy.Spider):
     
     
     def start_requests(self):
-        payload = { 'pCdSetor': '114', 'pCdQuadra': '249', 'pCdLote': '0090' }
-        yield Request(url, self.parse_data, method="POST", body=str(payload), headers={"Content-Type":"application/json"})
+        if not self.state.has_key('setor'):
+            self.state['setor'] = 0
+            self.state['quadra'] = 0
+            self.state['lote'] = 0
+    
+        print "Starting in..." + ",".join([str(self.state['setor']).zfill(3),str(self.state['quadra']).zfill(4),str(self.state['lote']).zfill(4)])
+        for setor in range(self.state['setor'],311):
+            for quadra in range(self.state['quadra'],1000):
+                for lote in range(self.state['lote'],10000):
+                    payload = { 'pCdSetor': str(setor).zfill(3), 'pCdQuadra': str(quadra).zfill(4), 'pCdLote': str(lote).zfill(4) }
+                    self.state['setor'] = setor
+                    self.state['quadra'] = quadra
+                    self.state['lote'] = lote
+                    yield Request(url, self.parse_data, method="POST", body=str(payload), headers={"Content-Type":"application/json"})
 
     def parse_data(self, response):
         # do stuff with data...
